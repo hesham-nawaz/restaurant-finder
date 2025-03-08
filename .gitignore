@@ -1,0 +1,17 @@
+# Environment variables and API keys
+.env
+
+# Data files (if they're large)
+data/*.csv
+
+# Python-specific
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+.venv/
+venv/
+ENV/
+
+# OS-specific
+.DS_Store
