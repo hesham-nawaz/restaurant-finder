@@ -1,6 +1,9 @@
 # Environment variables and API keys
 .env
 
+# AWS credentials and config files
+configs/
+
 # Data files (if they're large)
 data/*.csv
 
