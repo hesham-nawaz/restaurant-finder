@@ -5,7 +5,7 @@
 configs/
 
 # Data files (if they're large)
-data/*.csv
+data/
 
 # Python-specific
 __pycache__/
