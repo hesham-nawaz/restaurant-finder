@@ -4,7 +4,11 @@ Gemini API client for AI-powered restaurant recommendations.
 
 import yaml
 import os
+import json
+from google import genai
 from typing import Dict, Any, Optional
+from ..models.restaurant_query import SimpleRestaurantQuery
+
 
 
 class GeminiClient:
@@ -19,6 +23,9 @@ class GeminiClient:
         """
         self.api_key = api_key
         self.prompts = self._load_prompts()
+        
+        # Initialize the new Google Gen AI client
+        self.client = genai.Client(api_key=self.api_key)
     
     def _load_prompts(self) -> Dict[str, Any]:
         """Load prompts from YAML configuration file."""
@@ -46,44 +53,35 @@ class GeminiClient:
         
         return system_prompt
     
-    def generate_text(self, prompt: str) -> str:
+    def generate_text(self, prompt: str, temperature: float = 0) -> str:
         """
         Generate text using Gemini API.
         
         Args:
             prompt: The prompt to send to Gemini
+            temperature: Controls randomness (0.0 to 1.0)
             
         Returns:
             Generated text response
-        """
-        # TODO: Implement actual Gemini API call
-        # For now, return a placeholder response
-        return f"Gemini response to: {prompt[:50]}..."
-    
-    def request_reformatter(self, user_request: str) -> Dict[str, Any]:
-        """
-        Reformats a plaintext user request into a structured dictionary.
-        
-        Args:
-            user_request: User's natural language request
             
-        Returns:
-            Structured dictionary with parsed request parameters
+        Raises:
+            Exception: If API call fails
         """
-        prompt = self.get_prompt('request_reformatter')
-        full_prompt = f"{prompt}\n\nUser request: {user_request}"
         
-        response = self.generate_text(full_prompt)
-        
-        # TODO: Parse the response into a proper dictionary
-        # For now, return a placeholder structure
-        return {
-            "location": "Los Angeles, CA",
-            "geographic_distance": None,
-            "time_distance": "20 minutes",
-            "cuisine": "Chinese",
-            "price": "cheap",
-            "rating": None,
-            "reviews": None,
-            "hours": None
-        }
+        try:
+            # Use the new SDK with simplified Pydantic model for API compatibility
+            response = self.client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt,
+                config={
+                    "response_mime_type": "application/json",
+                    "response_schema": SimpleRestaurantQuery,
+                    "temperature": temperature
+                }
+            )
+            
+            # Return the generated text
+            return response.text
+            
+        except Exception as e:
+            raise Exception(f"Failed to generate text with Gemini API: {str(e)}")
